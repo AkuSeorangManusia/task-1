@@ -1,0 +1,88 @@
+- name: update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: create prometheus group
+  group:
+    name: "{{ prometheus_group }}"
+    system: true
+
+- name: add prometheus user
+  user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    system: true
+    create_home: false
+
+- name: create prometheus directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: /etc/prometheus
+      owner: root
+      group: root
+      mode: '0755'
+    - path: /var/lib/prometheus
+      owner: "{{ prometheus_user }}"
+      group: "{{ prometheus_group }}"
+      mode: '0755'
+
+- name: download prometheus
+  get_url:
+    url: "{{ prometheus_download_url }}"
+    dest: "{{ prometheus_archive_path }}"
+    mode: '0644'
+  
+- name: extract prometheus
+  unarchive:
+    src: "{{ prometheus_archive_path }}"
+    dest: /tmp/
+    remote_src: yes
+    creates: "{{ prometheus_extract_dir }}"
+
+- name: install prometheus binary
+  copy:
+    src: "{{ prometheus_extract_dir }}/prometheus"
+    dest: /usr/local/bin/prometheus
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: install promtool binary
+  copy:
+    src: "{{ prometheus_extract_dir }}/promtool"
+    dest: /usr/local/bin/promtool
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: install prometheus config
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: create prometheus service file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: '0644'
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: enable and start(restart) prometheus service
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: restarted

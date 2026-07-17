@@ -1,9 +1,77 @@
-- name: update apt cache
-  apt:
-    update_cache: yes
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
 
-- name: install stress-ng
-  apt:
+- name: Install stress-ng
+  ansible.builtin.apt:
     name: stress-ng
     state: present
+
+- name: Install sysstat
+  ansible.builtin.apt:
+    name: sysstat
+    state: present
+
+- name: Create apt keyring directory
+  ansible.builtin.file:
+    path: "{{ app_apt_keyring_directory }}"
+    state: directory
+    mode: '0755'
+
+- name: Download grafana gpg key
+  ansible.builtin.get_url:
+    url: "{{ app_grafana_gpg_key_url }}"
+    dest: "{{ app_apt_keyring_directory }}/grafana.gpg"
+    mode: '0644'
+
+- name: Add grafana apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ app_apt_keyring_directory }}/grafana.gpg] https://apt.grafana.com stable main"
+    filename: grafana
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install alloy
+  ansible.builtin.apt:
+    name: alloy
+    state: present
+
+- name: Add alloy user to systemd-journal and adm groups
+  ansible.builtin.user:
+    name: alloy
+    groups: systemd-journal,adm
+    append: true
+
+- name: Validate loki endpoint is provided
+  ansible.builtin.assert:
+    that:
+      - loki_endpoint is defined
+      - loki_endpoint | length > 0
+    fail_msg: "Set loki_endpoint in inventory/group vars, ansible-vault, or -e before running this role."
+
+- name: Backup alloy configuration file
+  ansible.builtin.copy:
+    src: "{{ app_alloy_config_dir }}/config.alloy"
+    dest: "{{ app_alloy_config_dir }}/config.alloy.sample"
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy alloy configuration file
+  ansible.builtin.template:
+    src: config.alloy.j2
+    dest: "{{ app_alloy_config_dir }}/config.alloy"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart alloy service
+  ansible.builtin.systemd:
+    name: alloy
+    state: restarted
+    enabled: true

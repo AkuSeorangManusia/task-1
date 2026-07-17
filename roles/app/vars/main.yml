@@ -1,0 +1,4 @@
+app_grafana_gpg_key_url: "https://apt.grafana.com/gpg.key"
+app_apt_keyring_directory: "/etc/apt/keyrings"
+app_apt_sources_list_path: "/etc/apt/sources.list.d"
+app_alloy_config_dir: "/etc/alloy/"

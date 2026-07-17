@@ -1,22 +1,22 @@
-- name: update apt cache
-  apt:
-    update_cache: yes
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
 
-- name: create prometheus group
-  group:
-    name: "{{ prometheus_group }}"
+- name: Create prometheus group
+  ansible.builtin.group:
+    name: "{{ monitoring_prometheus_group }}"
     system: true
 
-- name: add prometheus user
-  user:
-    name: "{{ prometheus_user }}"
-    group: "{{ prometheus_group }}"
+- name: Add prometheus user
+  ansible.builtin.user:
+    name: "{{ monitoring_prometheus_user }}"
+    group: "{{ monitoring_prometheus_group }}"
     system: true
     create_home: false
 
-- name: create prometheus directories
-  file:
+- name: Create prometheus directories
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     owner: "{{ item.owner }}"
@@ -28,135 +28,212 @@
       group: root
       mode: '0755'
     - path: /var/lib/prometheus
-      owner: "{{ prometheus_user }}"
-      group: "{{ prometheus_group }}"
+      owner: "{{ monitoring_prometheus_user }}"
+      group: "{{ monitoring_prometheus_group }}"
       mode: '0755'
 
-- name: download prometheus
-  get_url:
-    url: "{{ prometheus_download_url }}"
-    dest: "{{ prometheus_archive_path }}"
+- name: Download prometheus
+  ansible.builtin.get_url:
+    url: "{{ monitoring_prometheus_download_url }}"
+    dest: "{{ monitoring_prometheus_archive_path }}"
     mode: '0644'
-  
-- name: extract prometheus
-  unarchive:
-    src: "{{ prometheus_archive_path }}"
+
+- name: Extract prometheus
+  ansible.builtin.unarchive:
+    src: "{{ monitoring_prometheus_archive_path }}"
     dest: /tmp/
-    remote_src: yes
-    creates: "{{ prometheus_extract_dir }}"
+    remote_src: true
+    creates: "{{ monitoring_prometheus_extract_dir }}"
 
-- name: install prometheus binary
-  copy:
-    src: "{{ prometheus_extract_dir }}/prometheus"
+- name: Install prometheus binary
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_extract_dir }}/prometheus"
     dest: /usr/local/bin/prometheus
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
     mode: '0755'
 
-- name: install promtool binary
-  copy:
-    src: "{{ prometheus_extract_dir }}/promtool"
+- name: Install promtool binary
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_extract_dir }}/promtool"
     dest: /usr/local/bin/promtool
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
     mode: '0755'
 
-- name: install prometheus config
-  template:
+- name: Install prometheus config
+  ansible.builtin.template:
     src: prometheus.yml.j2
     dest: /etc/prometheus/prometheus.yml
     owner: root
     group: root
     mode: '0644'
 
-- name: create prometheus service file
-  template:
+- name: Create prometheus service file
+  ansible.builtin.template:
     src: prometheus.service.j2
     dest: /etc/systemd/system/prometheus.service
     mode: '0644'
 
-- name: reload systemd
-  systemd:
-    daemon_reload: yes
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
 
-- name: enable and start(restart) prometheus service
-  systemd:
+- name: Enable and start(restart) prometheus service
+  ansible.builtin.systemd:
     name: prometheus
-    enabled: yes
+    enabled: true
     state: restarted
 
-- name: create blackbox_exporter group
-  group:
-    name: "{{ blackbox_exporter_group }}"
+- name: Create blackbox_exporter group
+  ansible.builtin.group:
+    name: "{{ monitoring_blackbox_exporter_group }}"
     system: true
 
-- name: create blackbox_exporter user
-  user:
-    name: "{{ blackbox_exporter_user }}"
-    group: "{{ blackbox_exporter_group }}"
+- name: Create blackbox_exporter user
+  ansible.builtin.user:
+    name: "{{ monitoring_blackbox_exporter_user }}"
+    group: "{{ monitoring_blackbox_exporter_group }}"
     system: true
     create_home: false
 
-- name: download blackbox_exporter
-  get_url:
-    url: "{{ blackbox_exporter_download_url }}"
-    dest: "{{ blackbox_exporter_archive_path }}"
+- name: Download blackbox_exporter
+  ansible.builtin.get_url:
+    url: "{{ monitoring_blackbox_exporter_download_url }}"
+    dest: "{{ monitoring_blackbox_exporter_archive_path }}"
     mode: '0644'
 
-- name: extract blackbox_exporter
-  unarchive:
-    src: "{{ blackbox_exporter_archive_path}}"
+- name: Extract blackbox_exporter
+  ansible.builtin.unarchive:
+    src: "{{ monitoring_blackbox_exporter_archive_path }}"
     dest: /tmp
-    remote_src: yes
-    creates: "{{ blackbox_exporter_extract_dir }}"
+    remote_src: true
+    creates: "{{ monitoring_blackbox_exporter_extract_dir }}"
 
-- name: install blackbox_exporter binary
-  copy:
-    src: "{{ blackbox_exporter_extract_dir }}/blackbox_exporter"
+- name: Install blackbox_exporter binary
+  ansible.builtin.copy:
+    src: "{{ monitoring_blackbox_exporter_extract_dir }}/blackbox_exporter"
     dest: /usr/local/bin/blackbox_exporter
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
     mode: '0755'
 
-- name: create blackbox_exporter config directory
-  file:
+- name: Create blackbox_exporter config directory
+  ansible.builtin.file:
     path: /etc/blackbox_exporter
     state: directory
     owner: root
     group: root
     mode: '0755'
 
-- name: copy blackbox_exporter config
-  copy:
-    src: "{{ blackbox_exporter_extract_dir }}/blackbox.yml"
+- name: Copy blackbox_exporter config
+  ansible.builtin.copy:
+    src: "{{ monitoring_blackbox_exporter_extract_dir }}/blackbox.yml"
     dest: /etc/blackbox_exporter/blackbox.yml
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
     mode: '0644'
 
-- name: change ownership of blackbox_exporter config directory
-  file:
+- name: Change ownership of blackbox_exporter config directory
+  ansible.builtin.file:
     path: /etc/blackbox_exporter
     owner: blackbox_exporter
     group: blackbox_exporter
     mode: '0755'
 
-- name: create blackbox_exporter service file
-  template:
+- name: Create blackbox_exporter service file
+  ansible.builtin.template:
     src: blackbox_exporter.service.j2
     dest: /etc/systemd/system/blackbox_exporter.service
     mode: '0644'
 
-- name: reload systemd
-  systemd:
-    daemon_reload: yes
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
 
-- name: enable and start(restart) blackbox_exporter service
-  systemd:
+- name: Enable and start(restart) blackbox_exporter service
+  ansible.builtin.systemd:
     name: blackbox_exporter
-    enabled: yes
+    enabled: true
+    state: restarted
+
+- name: Create loki group
+  ansible.builtin.group:
+    name: "{{ monitoring_loki_group }}"
+    system: true
+
+- name: Create loki user
+  ansible.builtin.user:
+    name: "{{ monitoring_loki_user }}"
+    group: "{{ monitoring_loki_group }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Download loki
+  ansible.builtin.get_url:
+    url: "{{ monitoring_loki_download_url }}"
+    dest: "{{ monitoring_loki_archive_path }}"
+    mode: '0644'
+
+- name: Create loki config directory
+  ansible.builtin.file:
+    path: /etc/loki
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download loki config
+  ansible.builtin.get_url:
+    url: "{{ monitoring_loki_config_download_url }}"
+    dest: /etc/loki/loki-local-config.yaml
+    mode: '0644'
+
+- name: Install unzip
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+
+- name: Extract loki
+  ansible.builtin.unarchive:
+    src: "{{ monitoring_loki_archive_path }}"
+    dest: /tmp
+    remote_src: true
+    creates: "{{ monitoring_loki_extract_bin }}"
+
+- name: Install loki binary
+  ansible.builtin.copy:
+    src: "{{ monitoring_loki_extract_bin }}"
+    dest: /usr/local/bin/loki
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Change ownership of loki config dir
+  ansible.builtin.file:
+    path: /etc/loki
+    owner: loki
+    group: loki
+    mode: '0755'
+
+- name: Create loki service file
+  ansible.builtin.template:
+    src: loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    mode: '0644'
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start(restart) loki service
+  ansible.builtin.systemd:
+    name: loki
+    enabled: true
     state: restarted

@@ -1,0 +1,14 @@
+[Unit]
+Description=Grafana Loki
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=loki
+Group=loki
+Type=simple
+ExecStart=/usr/local/bin/loki \
+        -config.file=/etc/loki/loki-local-config.yaml
+
+[Install]
+WantedBy=multi-user.target

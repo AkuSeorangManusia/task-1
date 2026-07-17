@@ -1,18 +1,18 @@
-- name: common setup
+- name: Common setup
   hosts: all
   gather_facts: true
   become: true
   roles:
     - common
 
-- name: monitoring setup
+- name: Monitoring setup
   hosts: monitoring
   gather_facts: true
   become: true
   roles:
     - monitoring
 
-- name: app stress-ng setup
+- name: App stress-ng setup
   hosts: app
   gather_facts: true
   become: true

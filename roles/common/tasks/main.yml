@@ -1,64 +1,65 @@
 - name: Update apt cache
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Install basic packages
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - git
       - vim
       - tar
+      - gpg
     state: present
 
-- name: create node_exporter group
-  group:
-    name: "{{ node_exporter_group }}"
-    system: yes
+- name: Create node_exporter group
+  ansible.builtin.group:
+    name: "{{ common_node_exporter_group }}"
+    system: true
 
-- name: create node_exporter user
-  user:
-    name: "{{ node_exporter_user }}"
-    group: "{{ node_exporter_group }}"
+- name: Create node_exporter user
+  ansible.builtin.user:
+    name: "{{ common_node_exporter_user }}"
+    group: "{{ common_node_exporter_group }}"
     shell: /usr/sbin/nologin
-    system: yes
-    create_home: no
+    system: true
+    create_home: false
 
-- name: download node_exporter archive
-  get_url:
-    url: "{{ node_exporter_download_url }}"
-    dest: "{{ node_exporter_archive_path }}"
+- name: Download node_exporter archive
+  ansible.builtin.get_url:
+    url: "{{ common_node_exporter_download_url }}"
+    dest: "{{ common_node_exporter_archive_path }}"
     mode: '0644'
 
-- name: extract node_exporter
-  unarchive:
-    src: "{{ node_exporter_archive_path }}"
+- name: Extract node_exporter
+  ansible.builtin.unarchive:
+    src: "{{ common_node_exporter_archive_path }}"
     dest: /tmp/
-    remote_src: yes
-    creates: "{{ node_exporter_extract_dir }}"
+    remote_src: true
+    creates: "{{ common_node_exporter_extract_dir }}"
 
-- name: install node_exporter binary
-  copy:
-    src: "{{ node_exporter_extract_dir }}/node_exporter"
+- name: Install node_exporter binary
+  ansible.builtin.copy:
+    src: "{{ common_node_exporter_extract_dir }}/node_exporter"
     dest: /usr/local/bin/node_exporter
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
     mode: '0755'
 
-- name: create node_exporter service file
-  template:
+- name: Create node_exporter service file
+  ansible.builtin.template:
     src: node_exporter.service.j2
     dest: /etc/systemd/system/node_exporter.service
     mode: '0644'
 
-- name: reload systemd
-  systemd:
-    daemon_reload: yes
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
 
-- name: enable and start(restart) node_exporter service
-  systemd:
+- name: Enable and start(restart) node_exporter service
+  ansible.builtin.systemd:
     name: node_exporter
-    enabled: yes
+    enabled: true
     state: restarted

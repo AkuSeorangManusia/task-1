@@ -1,13 +1,35 @@
-prometheus_version: 3.13.0
-prometheus_download_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
-prometheus_user: "prometheus"
-prometheus_group: "prometheus"
-prometheus_archive_path: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
-prometheus_extract_dir: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64"
+# prometheus variables
+monitoring_prometheus_version: 3.13.0
+monitoring_prometheus_release_base_url: "https://github.com/prometheus/prometheus/releases/download"
+monitoring_prometheus_download_url: >-
+  {{ monitoring_prometheus_release_base_url
+    ~ '/v' ~ monitoring_prometheus_version
+    ~ '/prometheus-' ~ monitoring_prometheus_version
+    ~ '.linux-amd64.tar.gz' }}
+monitoring_prometheus_user: "prometheus"
+monitoring_prometheus_group: "prometheus"
+monitoring_prometheus_archive_path: "/tmp/prometheus-{{ monitoring_prometheus_version }}.linux-amd64.tar.gz"
+monitoring_prometheus_extract_dir: "/tmp/prometheus-{{ monitoring_prometheus_version }}.linux-amd64"
 
-blackbox_exporter_version: "0.28.0"
-blackbox_exporter_download_url: "https://github.com/prometheus/blackbox_exporter/releases/download/v{{ blackbox_exporter_version }}/blackbox_exporter-{{ blackbox_exporter_version }}.linux-amd64.tar.gz"
-blackbox_exporter_user: "blackbox_exporter"
-blackbox_exporter_group: "blackbox_exporter"
-blackbox_exporter_archive_path: "/tmp/blackbox_exporter-{{ blackbox_exporter_version }}.linux-amd64.tar.gz"
-blackbox_exporter_extract_dir: "/tmp/blackbox_exporter-{{ blackbox_exporter_version }}.linux-amd64"
+# blackbox_exporter variables
+monitoring_blackbox_exporter_version: "0.28.0"
+monitoring_blackbox_exporter_release_base_url: "https://github.com/prometheus/blackbox_exporter/releases/download"
+monitoring_blackbox_exporter_download_url: >-
+  {{ monitoring_blackbox_exporter_release_base_url
+    ~ '/v' ~ monitoring_blackbox_exporter_version
+    ~ '/blackbox_exporter-' ~ monitoring_blackbox_exporter_version
+    ~ '.linux-amd64.tar.gz' }}
+monitoring_blackbox_exporter_user: "blackbox_exporter"
+monitoring_blackbox_exporter_group: "blackbox_exporter"
+monitoring_blackbox_exporter_archive_path: "/tmp/blackbox_exporter-{{ monitoring_blackbox_exporter_version }}.linux-amd64.tar.gz"
+monitoring_blackbox_exporter_extract_dir: "/tmp/blackbox_exporter-{{ monitoring_blackbox_exporter_version }}.linux-amd64"
+
+# loki variables
+monitoring_loki_version: "3.7.3"
+monitoring_loki_release_base_url: "https://github.com/grafana/loki/releases/download"
+monitoring_loki_download_url: "{{ monitoring_loki_release_base_url }}/v{{ monitoring_loki_version }}/loki-linux-amd64.zip"
+monitoring_loki_user: "loki"
+monitoring_loki_group: "loki"
+monitoring_loki_archive_path: "/tmp/loki-{{ monitoring_loki_version }}.linux-amd64.zip"
+monitoring_loki_extract_bin: "/tmp/loki-linux-amd64"
+monitoring_loki_config_download_url: "https://raw.githubusercontent.com/grafana/loki/main/cmd/loki/loki-local-config.yaml"

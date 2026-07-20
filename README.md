@@ -7,25 +7,32 @@ purpose
 tree!!!!
 ```
 ├── ansible.cfg
-├── inventory.ini
+├── inventory.example.ini
+├── README.md
 ├── roles
-│   ├── app
-│   │   └── tasks
-│   │       └── main.yml
-│   ├── common
-│   │   ├── tasks
-│   │   │   └── main.yml
-│   │   ├── templates
-│   │   │   └── node_exporter.service.j2
-│   │   └── vars
-│   │       └── main.yml
-│   └── monitoring
-│       ├── tasks
-│       │   └── main.yml
-│       ├── templates
-│       │   ├── prometheus.service.j2
-│       │   └── prometheus.yml.j2
-│       └── vars
-│           └── main.yml
+│   ├── app
+│   │   ├── tasks
+│   │   │   └── main.yml
+│   │   ├── templates
+│   │   │   └── config.alloy.j2
+│   │   └── vars
+│   │       └── main.yml
+│   ├── common
+│   │   ├── tasks
+│   │   │   └── main.yml
+│   │   ├── templates
+│   │   │   └── node_exporter.service.j2
+│   │   └── vars
+│   │       └── main.yml
+│   └── monitoring
+│       ├── tasks
+│       │   └── main.yml
+│       ├── templates
+│       │   ├── blackbox_exporter.service.j2
+│       │   ├── loki.service.j2
+│       │   ├── prometheus.service.j2
+│       │   └── prometheus.yml.j2
+│       └── vars
+│           └── main.yml
 └── setup.yml
 ```
